@@ -9433,4 +9433,3 @@ class JarvisUI:
     def user_name(self) -> str:
         return self._win._user_name
 
-    @property
