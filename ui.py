@@ -9428,3 +9428,9 @@ class JarvisUI:
             self._win.hud.set_speech_level(level)
         except Exception:
             pass
+
+    @property
+    def user_name(self) -> str:
+        return self._win._user_name
+
+    @property
