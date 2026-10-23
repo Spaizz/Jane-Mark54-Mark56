@@ -6367,8 +6367,9 @@ class MainWindow(QMainWindow):
         cw = self.centralWidget()
         pw = _CameraPreview._W
         ph = self._cam_preview.height()
+        _right_width = self._right_panel.width() if hasattr(self, "_right_panel") else _RIGHT_W
         self._cam_preview.setGeometry(
-            cw.width() - _RIGHT_W - pw - 12,
+            cw.width() - _right_width - pw - 12,
             cw.height() - ph - 28,
             pw, ph,
         )
@@ -8463,19 +8464,21 @@ class MainWindow(QMainWindow):
             except Exception:
                 pass
     def _centre_overlay(self, ov) -> None:
-        """Place a floating overlay in the middle of the HUD and show it."""
+        """Centre a floating overlay and keep it inside the available client area."""
         cw = self.centralWidget()
+        max_w = max(1, cw.width() - 16)
+        max_h = max(1, cw.height() - 16)
         ov.adjustSize()
-        ov.setGeometry(
-            max(0, (cw.width()  - ov.width())  // 2),
-            max(0, (cw.height() - ov.height()) // 2),
-            ov.width(), ov.height(),
-        )
+        # A few settings panes have taller size hints than the default window.
+        # Their body is scrollable, so constraining the outer geometry is safer
+        # than letting the bottom of the panel disappear below the desktop.
+        width = min(max_w, max(1, ov.width()))
+        height = min(max_h, max(1, ov.height()))
+        ov.resize(width, height)
+        ov.move(max(8, (cw.width() - width) // 2),
+                max(8, (cw.height() - height) // 2))
         ov.show()
         ov.raise_()
-
-    # ── Audio devices ────────────────────────────────────────────────────────
-
     def _open_audio_devices(self):
         ov = AudioDeviceOverlay(parent=self.centralWidget())
         ov.picked.connect(self._on_audio_devices_applied)
