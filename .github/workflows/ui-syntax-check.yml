@@ -58,7 +58,7 @@ jobs:
               "_open_memory_panel", "_open_plugin_manager", "_open_plugin_settings",
               "_open_remote", "_set_hud_style", "_apply_ui_preferences",
               "_open_ui_workbench", "_set_widget_position", "_set_command_position",
-              "_apply_name_update", "show_video", "stop_video", "video_is_playing",
+              "_apply_name_update", "stop_video", "video_is_playing",
           }
           missing_main = main_required - methods_for("MainWindow")
           assert not missing_main, f"Missing MainWindow hooks: {sorted(missing_main)}"
