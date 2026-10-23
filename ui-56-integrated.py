@@ -1271,7 +1271,7 @@ class HudCanvas(QWidget):
             p.drawEllipse(QRectF(cx - inner, cy - inner, inner * 2, inner * 2))
 
             # 9. The name, sized from the string rather than from the radius alone:
-            #    DEFAULT_ASSISTANT_NAME and a name someone renamed to "MAX" are very
+            #    JANE and a name someone renamed to "MAX" are very
             #    different widths, and a fixed fraction of r spills one of them past
             #    the ring it is supposed to sit inside.
             name = self._assistant_name or ""
@@ -7091,7 +7091,7 @@ class MainWindow(QMainWindow):
         self._title_lbl.setStyleSheet(f"color: {C.PRI}; background: transparent;")
         mid.addWidget(self._title_lbl)
         _sub_text = ("A Friendly Assistant"
-                     if _disp in (DEFAULT_ASSISTANT_NAME, DEFAULT_ASSISTANT_NAME)
+                     if _disp in (DEFAULT_ASSISTANT_NAME, "J.A.R.V.I.S")
                      else "Personal AI Assistant")
         self._sub_lbl = QLabel(_sub_text)
         self._sub_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
