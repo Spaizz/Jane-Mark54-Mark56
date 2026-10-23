@@ -307,6 +307,13 @@ _HUD_MODE_LABELS = {
 APP_VERSION  = "MARK LVI"
 APP_PROTOCOL = APP_VERSION.split()[-1]
 
+# Public UI defaults used by the HUD, identity editor and wake-phrase adapter.
+DEFAULT_ASSISTANT_NAME = "JANE"
+DEFAULT_ASSISTANT_TAGLINE = "JUST ANOTHER NEURAL ENGINE"
+DEFAULT_WAKE_WORD = "Hey JARVIS"
+_WAKE_WORD_MIN = 2
+_WAKE_WORD_MAX = 48
+
 _DEFAULT_W, _DEFAULT_H = 980, 700
 _MIN_W,     _MIN_H     = 820, 580
 _LEFT_W  = 148
@@ -9400,6 +9407,10 @@ class JarvisUI:
     def on_identity_change(self):
         return self._win.on_identity_change
 
+    @on_identity_change.setter
+    def on_identity_change(self, callback):
+        self._win.on_identity_change = callback
+
     @property
     def wake_word_phrase(self) -> str:
         return self._win._wake_word_phrase
@@ -9421,6 +9432,10 @@ class JarvisUI:
     @property
     def on_wake_word_change(self):
         return self._win.on_wake_word_change
+
+    @on_wake_word_change.setter
+    def on_wake_word_change(self, callback):
+        self._win.on_wake_word_change = callback
 
     def set_speech_level(self, level: float) -> None:
         """Thread-safe output speech amplitude hook for TTS playback."""
