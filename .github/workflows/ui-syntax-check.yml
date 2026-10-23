@@ -1,4 +1,4 @@
-name: UI syntax check
+name: UI syntax and compatibility check
 on:
   push:
     branches:
@@ -14,5 +14,61 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Compile integrated UI
-        run: python -m py_compile ui-56-integrated.py
+      - name: Compile both the integration copy and drop-in ui.py
+        run: python -m py_compile ui-56-integrated.py ui.py
+      - name: Check public interface and preserved features
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          path = Path("ui.py")
+          tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+          classes = {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
+
+          required_classes = {
+              "MainWindow", "JarvisUI", "HudCanvas", "ProvidersOverlay",
+              "AudioDeviceOverlay", "UIWorkbenchOverlay", "SettingsOverlay",
+              "WeatherWidget", "ClockWidget", "BatteryWidget", "NetworkWidget",
+              "QuickNotesWidget",
+          }
+          missing_classes = required_classes - classes.keys()
+          assert not missing_classes, f"Missing UI classes: {sorted(missing_classes)}"
+
+          def methods_for(name):
+              return {
+                  node.name for node in classes[name].body
+                  if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+              }
+
+          facade_required = {
+              "__init__", "set_audio_level", "set_speech_level", "push_visemes",
+              "set_state", "show_video", "stop_video", "set_video_muted",
+              "video_is_playing", "start_camera_stream", "stop_camera_stream",
+              "assistant_name", "user_name", "start_speaking", "stop_speaking",
+              "wake_word_phrase", "wake_word_matches", "process_wake_transcript",
+              "set_wake_word_phrase",
+          }
+          missing_facade = facade_required - methods_for("JarvisUI")
+          assert not missing_facade, f"Missing JarvisUI API: {sorted(missing_facade)}"
+
+          main_required = {
+              "_build_left_panel", "_build_right_panel", "_build_input_row",
+              "_build_controls_drawer", "_open_audio_devices", "_open_providers",
+              "_open_memory_panel", "_open_plugin_manager", "_open_plugin_settings",
+              "_open_remote", "_set_hud_style", "_apply_ui_preferences",
+              "_open_ui_workbench", "_set_widget_position", "_set_command_position",
+              "_apply_name_update", "show_video", "stop_video", "video_is_playing",
+          }
+          missing_main = main_required - methods_for("MainWindow")
+          assert not missing_main, f"Missing MainWindow hooks: {sorted(missing_main)}"
+
+          hud_required = {
+              "_paint_orbital_event", "_paint_original_modes", "_set_hud_style_local",
+              "set_audio_level", "set_speech_level", "push_visemes",
+          }
+          missing_hud = hud_required - methods_for("HudCanvas")
+          assert not missing_hud, f"Missing HUD features: {sorted(missing_hud)}"
+
+          print("OK: syntax, main.py facade, Mark 56 video/provider/audio features, and Mark 54 HUD/Workbench features.")
+          PY
